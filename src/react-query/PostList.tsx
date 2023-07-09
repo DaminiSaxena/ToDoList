@@ -1,34 +1,51 @@
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-
-interface Post {
-  id: number;
-  title: string;
-  body: string;
-  userId: number;
-}
+import axios from "axios";
+import { useEffect, useState } from "react";
+import usePost from "./hooks/usePost";
 
 const PostList = () => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    axios
-      .get('https://jsonplaceholder.typicode.com/posts')
-      .then((res) => setPosts(res.data))
-      .catch((error) => setError(error));
-  }, []);
-
-  if (error) return <p>{error}</p>;
+  const pageSize = 10;
+  const [page, setPage] = useState(1);
+  const [user, setUser] = useState<number>();
+  const {
+    data: posts,
+    error,
+    isLoading,
+  } = usePost({ userId: user, page: page, pageSize: pageSize });
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>{error.message}</p>;
 
   return (
-    <ul className="list-group">
-      {posts.map((post) => (
-        <li key={post.id} className="list-group-item">
-          {post.title}
-        </li>
-      ))}
-    </ul>
+    <>
+      <select
+        onChange={(event) => setUser(parseInt(event.target.value))}
+        className="form-select mb-3"
+        value={user}
+      >
+        <option value={""}></option>
+        <option value={1}>User1</option>
+        <option value={2}>User2</option>
+        <option value={3}>User3</option>
+      </select>
+      <ul className="list-group">
+        {posts?.map((post) => (
+          <li key={post.id} className="list-group-item">
+            {post.title}
+          </li>
+        ))}
+      </ul>
+      <button
+        onClick={() => setPage(page - 1)}
+        className="btn btn-primary my-3"
+      >
+        Previous
+      </button>
+      <button
+        onClick={() => setPage(page + 1)}
+        className="btn btn-primary my-3 ms-3"
+      >
+        Next
+      </button>
+    </>
   );
 };
 
