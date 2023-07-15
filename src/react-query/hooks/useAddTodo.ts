@@ -15,7 +15,7 @@ export const useAddTodo = (onAdd: () => void) => {
   const addTodo = useMutation<Todo, Error, Todo, TodoContext>({
     mutationFn: (todo: Todo) => todoService.post(todo),
     onMutate: (newTodo) => {
-      const previousTodo = queryClient.getQueryData(["todo"]);
+      const previousTodo = queryClient.getQueryData<Todo[]>(["todo"]) || [];
       queryClient.setQueryData<Todo[]>(CACHE_KEY_TODOS, (todos) => [
         newTodo,
         ...(todos || []),
@@ -30,7 +30,7 @@ export const useAddTodo = (onAdd: () => void) => {
     },
     onError: (error, newTodo, context) => {
       if (!context) return;
-      queryClient.setQueryData(CACHE_KEY_TODOS, (todos) => [
+      queryClient.setQueryData(CACHE_KEY_TODOS, () => [
         ...(context?.previousTodo || []),
       ]);
     },
