@@ -6,22 +6,11 @@ import {
 import axios from "axios";
 import { useRef } from "react";
 import { Todo } from "./hooks/useTodo";
+import { useAddTodo } from "./hooks/useAddTodo";
 
 const TodoForm = () => {
-  const queryClient = useQueryClient();
-  const addTodo = useMutation<Todo, Error, Todo>({
-    mutationFn: (todo: Todo) => {
-      return axios
-        .post<Todo>("https://jsonplaceholder.typicode.com/todos", todo)
-        .then((res) => res.data);
-    },
-    onSuccess: (addedTodo) => {
-      queryClient.setQueryData<Todo[]>(["todo"], (todos) => [
-        addedTodo,
-        ...(todos || []),
-      ]);
-      if (ref.current) ref.current.value = "";
-    },
+  const [addTodo] = useAddTodo(() => {
+    if (ref.current) ref.current.value = "";
   });
   const ref = useRef<HTMLInputElement>(null);
 
